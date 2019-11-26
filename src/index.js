@@ -1,12 +1,32 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import Game from './containers/Game';
 import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
 
-ReactDOM.render(<App />, document.getElementById('root'));
+import { Provider } from 'react-redux';
+import { createStore, applyMiddleware, compose } from 'redux';
+import thunk from 'redux-thunk';
+import rootReducer from './store/reducers';
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+
+const preloadedState = {};
+
+try {
+  let bestScore = localStorage.getItem('bestScore');
+  if(bestScore) {
+    bestScore = JSON.parse(bestScore);
+    preloadedState.scores = { bestScore };
+  }
+} catch(e){}
+
+const store = createStore(rootReducer, preloadedState, composeEnhancers(
+  applyMiddleware(thunk)
+));
+
+ReactDOM.render(
+  <Provider store={store}>
+    <Game />
+  </Provider>,
+  document.getElementById('root')
+);
